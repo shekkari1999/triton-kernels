@@ -80,13 +80,15 @@ def get_device_info() -> tuple[str, float, float]:
     return name, peak_bw, peak_tf
 
 
-def bench_ms(fn, *args, warmup: int = 25, rep: int = 100) -> float:
+def bench_ms(fn, *args, warmup: int = 25, rep: int = 100, **kwargs) -> float:
     """
     Returns median wall-time in milliseconds.
     Uses triton.testing.do_bench which warms up the kernel and
     handles CUDA synchronisation correctly.
     """
-    return triton.testing.do_bench(lambda: fn(*args), warmup=warmup, rep=rep)
+    return triton.testing.do_bench(
+        lambda: fn(*args, **kwargs), warmup=warmup, rep=rep
+    )
 
 
 def report_header():

@@ -62,7 +62,7 @@ def _tflops_pct(flops: int, ms: float, peak_tf: float) -> float:
 
 def run(save_path: Path) -> dict:
     if not torch.cuda.is_available():
-        raise SystemExit("CUDA GPU required. Rent an H100 or A100 — see README.md.")
+        raise SystemExit("CUDA GPU required.")
 
     k1 = _load_kernel("01_vector_add.py")
     k2 = _load_kernel("02_matmul.py")
@@ -86,7 +86,7 @@ def run(save_path: Path) -> dict:
     }
 
     print("=" * 72)
-    print("  Triton Kernels for LLM Inference — Benchmark Suite")
+    print("  Triton Kernels for LLM Inference: Benchmark Suite")
     print("=" * 72)
     print(f"  GPU              : {gpu_name}")
     print(f"  Peak HBM         : {peak_bw:,} GB/s")
@@ -208,12 +208,14 @@ def run(save_path: Path) -> dict:
         try:
             ms_naive = bench_ms(k7.naive_attention, Q, K, V, is_causal=True)
             ms_fa = bench_ms(k7.flash_attention_forward, Q, K, V, is_causal=True)
-            mem_naive = _peak_mem_delta_mb(k7.naive_attention, Q, K, V, True)
+            mem_naive = _peak_mem_delta_mb(
+                lambda: k7.naive_attention(Q, K, V, is_causal=True)
+            )
             mem_fa = _peak_mem_delta_mb(
                 lambda: k7.flash_attention_forward(Q, K, V, is_causal=True)
             )
         except torch.cuda.OutOfMemoryError:
-            print(f"  {S:>6}  OOM — skipping longer sequences")
+            print(f"  {S:>6}  OOM, skipping longer sequences")
             torch.cuda.empty_cache()
             break
         speedup = ms_naive / ms_fa
@@ -262,15 +264,6 @@ def run(save_path: Path) -> dict:
             f"mem {hl.get('mem_ratio', 0):.1f}×"
         )
 
-    _sep("Resume line (paste after verifying on your GPU)")
-    hl = out["kernels"].get("flash_attention", {}).get("headline", {})
-    softmax_pct = out["kernels"]["fused_softmax"]["hbm_pct"]
-    print(
-        f"  Built Triton kernels for LLM inference (fused softmax/RMSNorm/RoPE, "
-        f"tiled GEMM, FlashAttention-2 forward): FA {hl.get('speedup', 0):.1f}× "
-        f"speedup vs naive at S={hl.get('seq_len', 8192)}, fused ops reach "
-        f"{softmax_pct:.0f}% of peak HBM on {gpu_name}."
-    )
     _sep()
 
     save_path.parent.mkdir(parents=True, exist_ok=True)
