@@ -1,0 +1,4 @@
+torch>=2.1.0
+triton>=2.2.0
+pytest>=7.0.0
+matplotlib>=3.7.0
