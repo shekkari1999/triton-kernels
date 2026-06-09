@@ -1,0 +1,25 @@
+{
+  "metadata": {
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "peak_hbm_gbs": 3350.0,
+    "peak_fp16_tflops": 989.0
+  },
+  "kernels": {
+    "vector_add": { "hbm_pct": 91.0 },
+    "fused_softmax": { "hbm_pct": 79.4 },
+    "rmsnorm": { "hbm_pct": 79.9 },
+    "rope": { "hbm_pct": 32.9 },
+    "gemm": { "pct_of_cublas": 85.0, "pct_peak_fp16": 61.6 },
+    "flash_attention": {
+      "headline": { "seq_len": 8192, "speedup": 16.91, "mem_ratio": 257.0 },
+      "sweep": [
+        { "seq_len": 512, "speedup": 2.85, "mem_ratio": 17.0 },
+        { "seq_len": 1024, "speedup": 4.39, "mem_ratio": 33.0 },
+        { "seq_len": 2048, "speedup": 9.80, "mem_ratio": 65.0 },
+        { "seq_len": 4096, "speedup": 14.10, "mem_ratio": 129.0 },
+        { "seq_len": 8192, "speedup": 16.91, "mem_ratio": 257.0 },
+        { "seq_len": 16384, "speedup": 13.72, "mem_ratio": 513.0 }
+      ]
+    }
+  }
+}

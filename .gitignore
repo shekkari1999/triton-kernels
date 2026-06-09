@@ -3,7 +3,3 @@ __pycache__/
 .pytest_cache/
 .venv/
 venv/
-benchmarks/results/*.json
-benchmarks/results/figures/*.png
-!benchmarks/results/.gitkeep
-!benchmarks/results/figures/.gitkeep
